@@ -1,0 +1,35 @@
+{
+  "name": "audiobook-manager",
+  "version": "1.0.0",
+  "description": "Small backend api deployed using serverless",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --verbose=false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teisha/audiobook-manager.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teisha/audiobook-manager/issues"
+  },
+  "homepage": "https://github.com/teisha/audiobook-manager#readme",
+  "dependencies": {
+    "aws-sdk": "^2.619.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "serverless-http": "^2.3.1",
+    "xlsx": "^0.15.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "babel-jest": "^25.1.0",
+    "eslint": "^6.8.0",
+    "jest": "^25.1.0",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^5.12.1"
+  }
+}

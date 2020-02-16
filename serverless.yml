@@ -1,0 +1,92 @@
+#serverless.yml
+
+tenant: laimasoftrs
+app: audiobook-manager
+service: audiobook-backend
+
+
+
+custom:
+  tableName: 'audiobooks-${self:provider.stage}'
+  dynamodb:
+    start:
+      migrate: true
+
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - {"Fn::GetAtt": ["UsersDynamoDBTable", "Arn"]}
+  environment:
+    USERS_TABLE: ${self:custom.tableName}
+
+
+functions:
+  app:
+    handler: api/index.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+
+resources:
+  Resources:
+    UsersDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: PKhash
+            AttributeType: S
+          - AttributeName: SKsort
+            AttributeType: S
+          - AttributeName: Status
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PKhash
+            KeyType: HASH
+          - AttributeName: SKsort
+            KeyType: RANGE  
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.tableName} 
+        GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+          - AttributeName: SKsort
+            KeyType: HASH
+          - AttributeName: PKhash
+            KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - Name 
+              - Status
+              - DateRecorded
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1            
+        - IndexName: GSI2
+          KeySchema:
+          - AttributeName: Status
+            KeyType: HASH
+          - AttributeName: PKhash
+            KeyType: RANGE
+          Projection: 
+            ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
+
