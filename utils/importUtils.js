@@ -1,0 +1,26 @@
+'use strict'
+const dynamodbUtils = require('../utils/dynamodbUtils')
+const Transaction = require('../models/transaction')
+
+
+module.exports.convertToTransaction = async ( data ) => {
+    let testTransaction
+    const dateParts = data.date.split('-')
+    const dateString = new Date("20" + dateParts[2] + "-" + dateParts[0] + "-" + dateParts[1]).toISOString()
+
+    if (data.asin) {
+        let bookInfo = {}
+        try {
+            const queryResults = await dynamodbUtils.getQueryByPK ("BOOK|" + data.asin, "TITLE|")
+            if (queryResults.ItemsJSON && queryResults.ItemsJSON.length > 0) {
+                bookInfo = queryResults.ItemsJSON[0]
+            }
+        } catch (error) {
+            console.error("Couldn't retrieve book ", data.asin)
+            console.error(error)
+        }
+
+        testTransaction = new Transaction(data.asin, null, data.username, data.status, dateString, bookInfo.title, bookInfo.author )
+    }
+    return testTransaction
+}

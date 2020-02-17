@@ -14,7 +14,7 @@ app.use(bodyParser.json({strict: false}))
 
 
 //Get User By Id
-app.get('/users/:userId', function(req, res) {
+app.get('/books/:bookId', function(req, res) {
     const params ={
         TableName: USERS_TABLE,
         Key: {
