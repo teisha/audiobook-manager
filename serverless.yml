@@ -7,6 +7,7 @@ service: audiobook-backend
 
 
 custom:
+  bucket: 'audiobook-manager-${self:provider.stage}'
   tableName: 'audiobooks-${self:provider.stage}'
   dynamodb:
     start:
@@ -29,6 +30,13 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - {"Fn::GetAtt": ["UsersDynamoDBTable", "Arn"]}
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:ListObject
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"        
   environment:
     USERS_TABLE: ${self:custom.tableName}
 
@@ -39,6 +47,8 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+    environment:
+      BUCKET: ${self:custom.bucket}
 
 resources:
   Resources:

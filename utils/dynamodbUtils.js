@@ -151,12 +151,18 @@ const issueQuery =  (params) => {
     return ddb.query(params)
     .promise()
     .then( (data) => {
-        if (data.Count > 0) {
+        if (data.Count > 0 && data.Items) {
             data.ItemsJSON = data.Items.map(item => {
                 return AWS.DynamoDB.Converter.unmarshall(item)
             })
+            console.log(data.ItemsJSON)
         }
-        console.log(data.ItemsJSON)
+
+// If there are more items than the query returned, 
+// this would set "ExclusiveStartKey" on params
+// with the value of data.LastEvaluatedKey
+// and issueQuery called again with new params.
+// But these datasets won't be large enough to hit the limits        
         return Promise.resolve(data)
     })
     .catch( (err) => {
@@ -191,18 +197,34 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
 /***************************************************
  * Query by GSI2 (Status)
  ******************************************************/
-module.exports.getQueryByStatus = (status) => {
+module.exports.getQueryByStatus = (status, otherThing, getTotal = false) => {
     console.log ("Get Query By Status: " + status)
     const params = {
         TableName: BOOK_TABLE,
-        IndexName: 'GSI2',
-        KeyConditionExpression: "#statusField = :value",
-        ExpressionAttributeNames : {
+        IndexName: 'GSI2'
+    }
+
+    if (otherThing) {
+        params.KeyConditionExpression = "#statusField = :value AND begins_with(#PKhash, :secondParam)"
+        params.ExpressionAttributeNames = {
+            '#statusField': 'Status',
+            '#PKhash' : 'PKhash'
+        }
+        params.ExpressionAttributeValues = {
+            ':value' : {S: status},
+            ':secondParam' : {S: otherThing}
+        }
+    } else {
+        params.KeyConditionExpression = "#statusField = :value",
+        params.ExpressionAttributeNames = {
             '#statusField': 'Status'
         },
-        ExpressionAttributeValues: {
+        params.ExpressionAttributeValues = {
             ':value' : {S: status}
         }
+    }
+    if (getTotal) {
+        params.Select = 'COUNT'
     }
     return issueQuery(params)
 }
