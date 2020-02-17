@@ -54,6 +54,7 @@ describe('Test Insert Book to dynamoDB',   () => {
             expect(doesExist.PKhash).not.toBeDefined()
 
             const newBook = await dynamodbUtils.saveRecord(insertBook.getInsertItem())
+            // const newTallies = await dynamodbUtils.saveRecord(insertBook.getTallyItem())
 
             const actualBook = await dynamodbUtils.getRecord (insertBook.PKhash, insertBook.SKsort )
 //            console.log( "GET ITEM: ", actualBook)

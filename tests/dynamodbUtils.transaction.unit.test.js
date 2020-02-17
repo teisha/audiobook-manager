@@ -40,11 +40,19 @@ describe("Test Transactions insert correctly",  () => {
 
             const testTransaction = await importUtils.convertToTransaction(testData)
             expect(testTransaction.title).toBe('12 Strong: The Declassified True Story of the Horse Soldiers')
+            const tallyBeforeInsert = await dynamodbUtils.getRecord (testTransaction.PKhash, 'TALLIES')
 
-            const savedTransaction = await dynamodbUtils.saveRecord(testTransaction.getInsertItem())
+            const savedTransaction = await dynamodbUtils.insertTransaction(testTransaction.getInsertItem())
+            expect(savedTransaction[testTransaction.Status]).toBeGreaterThan(tallyBeforeInsert[testTransaction.Status])
+
             const actualTransaction = await dynamodbUtils.getRecord (testTransaction.PKhash, testTransaction.SKsort )            
 
             expect(actualTransaction.PKhash).toBe(testTransaction.PKhash)
+            expect(actualTransaction.SKsort).toBe(testTransaction.SKsort)
+            expect(actualTransaction.Status).toBe(testTransaction.Status)
+            expect(actualTransaction.dateRecorded).toBe(testTransaction.dateRecorded)
+            expect(actualTransaction.username).toBe(testTransaction.username)
+
         } catch(error) {
             console.error(error)
             expect(error).toBeNull()

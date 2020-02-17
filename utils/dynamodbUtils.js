@@ -70,6 +70,11 @@ module.exports.removeRecord = (pkhash, skshort ) => {
  *  Save Single Record by PK/SK
  ****************************************/
 module.exports.saveRecord = (item) => {
+    return save(item)
+     
+}
+
+const save = (item) => {
     const dynamoItem = AWS.DynamoDB.Converter.marshall(item)
      // console.log("Add", dynamoItem)
     const params = {
@@ -118,7 +123,7 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
                     return AWS.DynamoDB.Converter.unmarshall(item)
                 })
             }
-            console.log(data)
+            console.log(data.ItemsJSON)
             return Promise.resolve(data)
         })
         .catch( (err) => {
@@ -130,27 +135,51 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
 }
 
 
-
-// insert a transaction needs to also update a total
+/*************************************************
+ * Insert a transactional event with statistic update
+ ************************************************/
 module.exports.insertTransaction = async (item) => {
-    const status = item.status
-    const record = await saveRecord(item)
+    const status = item.Status
+    const updateParams = {
+        TableName: BOOK_TABLE,
+        Key: {
+            'PKhash' : {S: item.PKhash},
+            'SKsort': {S: 'TALLIES'}
+        },
+        ReturnValues: "UPDATED_NEW",
+        ReturnConsumedCapacity: 'TOTAL',
+        UpdateExpression: "SET #stat = #stat + :inc",
+        ExpressionAttributeNames: {
+            '#stat': status
+        },
+        ExpressionAttributeValues: {
+            ':inc': {N: '1'}
+        }
+    }
+    try {
+        const record = await save(item)
+        return ddb.updateItem(updateParams)
+        .promise()
+        .then( (data) => {
+            console.log(data)
+            if (data.Attributes) {
+                return AWS.DynamoDB.Converter.unmarshall(data.Attributes)
+            } 
+            return Promise.resolve(data)
+        })
+        .catch( (err) => {
+                console.log("Error updating '", status, "'' on '",  item.PKhash + "'")
+                console.error(err)
+                return Promise.reject(err)
+        })        
+    } catch (error) {
+        console.error("Could not save and update stats for ", item)
+        return Promise.reject(error)
+    }
+
 }
 
 
-//Use conditional expression for update to be sure no updates get thrown out
-
-    //  for query??
-      // const params = {
-      //   'Key': ddt.wrap({ topicArn }),
-      //   'ExpressionAttributeValues': ddt.wrap({
-      //     ':one': 1,
-      //     ':aggregator': aggregator
-      //   }),
-      //   'ConditionExpression': 'size(aggregators) = :one AND contains(aggregators, :aggregator)',
-      //   'TableName': SUBSCRIPTIONS_TABLE,
-      //   'ReturnValues': 'ALL_OLD'
-      // }
 
 
 

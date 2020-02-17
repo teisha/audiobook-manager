@@ -35,4 +35,15 @@ module.exports = class Book {
         return bookItem
     }
 
+
+    getTallyItem() {
+        const tallyItem = {}
+        tallyItem.PKhash = this.PKhash
+        tallyItem.SKsort = "TALLIES"
+        tallyItem.PURCHASED = 0
+        tallyItem.WISHLIST = 0
+        tallyItem.LISTENED = 0
+        return tallyItem
+    }
+
 }
