@@ -61,8 +61,27 @@ describe("Test Transactions insert correctly",  () => {
         done()
     })
 
+})
 
+describe("Reporting Queries",  () => {
+    it("returns transaction record by status", async  (done) => {
+        try {
+            const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED')
+            console.log(purchasedTransaction)
+            expect(purchasedTransaction.ItemsJSON).toBeDefined()
+            expect(purchasedTransaction.Count).toBeGreaterThan(0)
+            const actual = purchasedTransaction.ItemsJSON[0]
+            expect(actual.SKsort).toBe('PERSON|rhunt')
+            expect(actual.PKhash).toBe('BOOK|TESTBOOK_NOT_REAL_BOOK')
+            expect(actual.Status).toBe('PURCHASED' )
 
+        } catch(error) {
+            console.error(error)
+            expect(error).toBeNull()
+        }
+
+        done()
+    })
 })
 
 

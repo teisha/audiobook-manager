@@ -97,44 +97,6 @@ const save = (item) => {
      
 }
 
-/***************************************
- *  Get One Or More Records by PK/partial SK
- ****************************************/
-module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
-    const params = {
-        TableName : BOOK_TABLE,
-        KeyConditionExpression: "#PKhash = :keyValue AND begins_with(#SKsort, :sortValue)",
-        ExpressionAttributeNames:{
-            '#PKhash': 'PKhash',
-            '#SKsort': 'SKsort'
-        },
-        ExpressionAttributeValues: {
-            ':keyValue': {S: pkhash},
-            ':sortValue' : {S: secondaryStartsWith}
-        },
-        ProjectionExpression: "PKhash, SKsort, asin, title, author"
-    }
-
-    return ddb.query(params)
-        .promise()
-        .then( (data) => {
-            if (data.Count > 0) {
-                data.ItemsJSON = data.Items.map(item => {
-                    return AWS.DynamoDB.Converter.unmarshall(item)
-                })
-            }
-            console.log(data.ItemsJSON)
-            return Promise.resolve(data)
-        })
-        .catch( (err) => {
-                console.log("Error querying '", pkhash, "'' on '",  BOOK_TABLE + "'")
-                console.error(err)
-                return Promise.reject(err)
-        })        
-
-}
-
-
 /*************************************************
  * Insert a transactional event with statistic update
  ************************************************/
@@ -182,5 +144,67 @@ module.exports.insertTransaction = async (item) => {
 
 
 
+/*******************************************
+ *  USING QUERIES:
+**********************************************/
+const issueQuery =  (params) => {
+    return ddb.query(params)
+    .promise()
+    .then( (data) => {
+        if (data.Count > 0) {
+            data.ItemsJSON = data.Items.map(item => {
+                return AWS.DynamoDB.Converter.unmarshall(item)
+            })
+        }
+        console.log(data.ItemsJSON)
+        return Promise.resolve(data)
+    })
+    .catch( (err) => {
+            console.log("Error querying ", params)
+            console.error(err)
+            return Promise.reject(err)
+    })  
+}
+
+/***************************************
+ *  Get One Or More Records by PK/partial SK
+ ****************************************/
+module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
+    console.log ("Get Query By PK: " + pkhash)
+    const params = {
+        TableName : BOOK_TABLE,
+        KeyConditionExpression: "#PKhash = :keyValue AND begins_with(#SKsort, :sortValue)",
+        ExpressionAttributeNames:{
+            '#PKhash': 'PKhash',
+            '#SKsort': 'SKsort'
+        },
+        ExpressionAttributeValues: {
+            ':keyValue': {S: pkhash},
+            ':sortValue' : {S: secondaryStartsWith}
+        },
+        ProjectionExpression: "PKhash, SKsort, asin, title, author"
+    }
+    return issueQuery(params)
+      
+}
+
+/***************************************************
+ * Query by GSI2 (Status)
+ ******************************************************/
+module.exports.getQueryByStatus = (status) => {
+    console.log ("Get Query By Status: " + status)
+    const params = {
+        TableName: BOOK_TABLE,
+        IndexName: 'GSI2',
+        KeyConditionExpression: "#statusField = :value",
+        ExpressionAttributeNames : {
+            '#statusField': 'Status'
+        },
+        ExpressionAttributeValues: {
+            ':value' : {S: status}
+        }
+    }
+    return issueQuery(params)
+}
 
 
