@@ -14,7 +14,6 @@ if (require('os').platform() === 'win32') {
 
 AWS.config.update({region: 'us-east-1'})
 const s3 = new AWS.S3({apiVersion: '2006-03-01'})
-
 const BUCKET = process.env.BUCKET || 'lsft-audiobook-manager-dev'
 
 

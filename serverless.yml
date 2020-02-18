@@ -7,6 +7,7 @@ service: audiobook-backend
 
 custom:
   bucket: 'lsft-audiobook-manager-${self:provider.stage}'
+  uploadDirectory: 'uploader'
   deployBucket: 'serverless-deploy-all-lsft-projects'
   tableName: 'audiobooks-${self:provider.stage}'
   dynamodb:
@@ -14,7 +15,7 @@ custom:
       migrate: true
 
 plugins:
-  - ./plugins/upload-test-file-plugin
+  - upload-test-file-plugin
 
 provider:
   name: aws
@@ -67,17 +68,17 @@ functions:
       - http: ANY /
       - http: 'ANY {proxy+}'
   uploader:
-    handler: uploads/process.insert
+    handler: uploader/process.insert
     events:
       - s3:
           bucket: ${self:custom.bucket}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: uploader/
+            - prefix: uploads/
             - suffix: .xlsx
           existing: true
     environment: 
-      KEY_PREFIX: 'uploads'
+      KEY_PREFIX: ${self:custom.uploadDirectory}
 
 
 

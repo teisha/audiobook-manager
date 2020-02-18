@@ -1,14 +1,16 @@
 # audiobook-manager
 
-This is a fictional application built with usernames gathered through a random name generator
+This is a fictional application built for a job application, grabbing usernames gathered through a random name generator.
+It's got no security on the API calls, because it's just a demo.
 
 # Deploy 
-======================= 
+
     This is a serverless deploy using the configuration in the serverless.yml file
     in the main project directory.
     It will create a NodeJS version 12.x application in AWS, creating Lamdba functions, a DynamoDB table, and an S3 Bucket.
 
     The objects this file creates are:
+
     - a table named "audiobooks-dev" (deploying in the dev environment) 
     - a one-time call to create an S3 bucket (lsft-audiobook-manager-dev).  The creation of the bucket is commented out after the first deploy. 
     - routes all HTTP get calls to /books url to the books.js handler in the api directory 
@@ -20,7 +22,7 @@ This is a fictional application built with usernames gathered through a random n
 
 
 # Project Structure
-========================= 
+
     
     ### api directory
     These are the apis made available by the HTTP functions defined in serverless.yml
@@ -44,7 +46,7 @@ This is a fictional application built with usernames gathered through a random n
     These are integration tests that drove the development of the application.  They are mostly functional and do not cover all test cases.
 
 # Data Uploads 
-=========================== 
+
 The event attached to the S3 bucket will call a function when an Excel file gets created in the S3 bucket.  
 For project simplicity, tt will expect a properly formatted Excel file and will automatically insert the data into DynamoDB table.
 
@@ -77,7 +79,7 @@ Another Global Secondary Index was created to query on Status field
 |Entity | PK   |  SK  | Query fields needed | Other attributes |
 | --------- | ---------- | ------------ | ---------- | ---------- | 
 | Book   |    BOOK#aisn   |    TITLE#title  |   | Attributes: Author, ASN, Description, etc |
-| |  BOOK#aisn |  PERSON#username | PURCHASED, date | Attributes: title, author, username,  name, status, date_recorded |
+| |  BOOK#aisn |  PERSON#username | Status (PURCHASED), date | Attributes: title, author, username,  name, status, date_recorded |
 | |  BOOK#aisn |   TALLIES  |   | Attributes:  num purchased, num listened, num wishlist updated when transaction is inserted |
 | Reading List (became Transaction)  |  BOOK#aisn |   PERSON#username | Status (LISTENED),  date  | Attributes:  title, author, status, percent_complete, date_recorded |
 | People |  PERSON#username |   PERSON#name |  | Attributes: name, email, phoneNumber |
