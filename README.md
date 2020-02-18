@@ -20,10 +20,11 @@ The objects this file creates are:
 
 ### Plugins
 The files for custom plugins are found in .serverless_plugins directory.
-The plugin for this project is called "upload-excel-file".
+The plugin for this project is called "uploadExcelFile".
 The plugin will take an Excel filename and upload that into the bucket and directory specified as custom variables in the serverless.yml file.
-Usage is:
-    `serverless upload-excel-file -xlFile "./assets/data/books.xlsx"`
+Usage is: \
+
+    `serverless uploadExcelFile -xlFile "./assets/data/books.xlsx"`
 
 
 # Project Structure

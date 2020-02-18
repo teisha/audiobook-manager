@@ -8,7 +8,7 @@ class ServerlessPlugin {
     this.options = options;
 
     this.commands = {
-      upload-excel-file: {
+      uploadExcelFile: {
         usage: 'This will upload a prewritten Excel file into the S3 bucket. The command expects two custom variables to exist in your serverless.yml: "bucket" and "uploadDirectory".  Those define the bucket and the key prefix for the file being uploaded.',
         lifecycleEvents: ['uploadData'],
         options: {
@@ -22,7 +22,7 @@ class ServerlessPlugin {
     };
 
     this.hooks = {
-      'upload-excel-file:uploadData': uploadData.bind(null, serverless, options)
+      'uploadExcelFile:uploadData': uploadData.bind(null, serverless, options)
     };
   }
 }
