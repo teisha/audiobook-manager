@@ -1,5 +1,4 @@
 #serverless.yml
-
 tenant: laimasoftrs
 app: audiobook-manager
 service: audiobook-backend
@@ -7,7 +6,8 @@ service: audiobook-backend
 
 
 custom:
-  bucket: 'audiobook-manager-${self:provider.stage}'
+  bucket: 'lsft-audiobook-manager-${self:provider.stage}'
+  deployBucket: 'serverless-deploy-all-lsft-projects'
   tableName: 'audiobooks-${self:provider.stage}'
   dynamodb:
     start:
@@ -19,6 +19,10 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-east-1
+  deploymentBucket: ${self:custom.deployBucket}
+  s3:
+    bucketOne:
+      name: ${self:custom.bucket}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -38,20 +42,49 @@ provider:
         - s3:ListBucket
       Resource: "arn:aws:s3:::${self:custom.bucket}/*"        
   environment:
-    USERS_TABLE: ${self:custom.tableName}
+    BOOK_TABLE: ${self:custom.tableName}
+    BUCKET: ${self:custom.bucket}
 
 
 functions:
-  app:
+  backend:
     handler: api/index.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
-    environment:
-      BUCKET: ${self:custom.bucket}
+  uploads:
+    handler: uploads/process.insert
+    events:
+      - s3:
+          bucket: ${self:custom.bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .xls
+          existing: true
+    environment: 
+      KEY_PREFIX: 'uploads'
+
+
 
 resources:
   Resources:
+    # UploadBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: ${self:custom.bucket}
+    #     AccessControl: Private
+    #     CorsConfiguration:
+    #       CorsRules:
+    #       - AllowedMethods:
+    #         - GET
+    #         - PUT
+    #         - POST
+    #         - HEAD
+    #         AllowedOrigins:
+    #         - "*"
+    #         AllowedHeaders:
+    #         - "*"    
     UsersDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:

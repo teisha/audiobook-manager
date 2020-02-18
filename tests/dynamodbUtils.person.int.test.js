@@ -18,7 +18,7 @@ const testHuman = {
 
 const testPerson = new Person (testHuman.username, testHuman.name, testHuman.email, testHuman.phone)
 
-describe ("Inserting People", () => {
+describe.skip ("Inserting People", () => {
     beforeEach(async (done) => {
         try {
             const deleted = await dynamodbUtils.removeRecord (testPerson.PKhash, testPerson.SKsort )

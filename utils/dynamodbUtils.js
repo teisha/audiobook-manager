@@ -85,12 +85,11 @@ const save = (item) => {
     return ddb.putItem(params)
         .promise()
         .then( (data) => {
-            console.log(data)
+//            console.log(data)
             return Promise.resolve(data)
         })
         .catch( (err) => {
-                console.log("Error adding '", pkhash, "'' to '",  BOOK_TABLE + "'")
-                console.error(bookItem)
+                console.log("Error adding ", item, " to ",  BOOK_TABLE)
                 console.error(err)
                 return Promise.reject(err)
         })
@@ -144,11 +143,15 @@ module.exports.insertTransaction = async (item) => {
 
 
 
+
+
+
+
 /*******************************************
- *  USING QUERIES:
+ *  USING SCAN:
 **********************************************/
-const issueQuery =  (params) => {
-    return ddb.query(params)
+const issueScan =  (params) => {
+    return ddb.scan(params)
     .promise()
     .then( (data) => {
         if (data.Count > 0 && data.Items) {
@@ -172,10 +175,38 @@ const issueQuery =  (params) => {
     })  
 }
 
+/*******************************************
+ *  USING QUERIES:
+**********************************************/
+const issueQuery =  (params) => {
+    return ddb.query(params)
+    .promise()
+    .then( (data) => {
+        if (data.Count > 0 && data.Items) {
+            data.ItemsJSON = data.Items.map(item => {
+                return AWS.DynamoDB.Converter.unmarshall(item)
+            })
+            console.log(data.ItemsJSON.PKHash)
+        }
+
+// If there are more items than the query returned, 
+// this would set "ExclusiveStartKey" on params
+// with the value of data.LastEvaluatedKey
+// and issueQuery called again with new params.
+// But these datasets won't be large enough to hit the limits        
+        return Promise.resolve(data)
+    })
+    .catch( (err) => {
+            console.log("Error querying ", params)
+            console.error(err)
+            return Promise.reject(err)
+    })  
+}
+
 /***************************************
  *  Get One Or More Records by PK/partial SK
  ****************************************/
-module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
+module.exports.getQueryByPK = (pkhash, secondaryStartsWith, getTotal = false) =>  {
     console.log ("Get Query By PK: " + pkhash)
     const params = {
         TableName : BOOK_TABLE,
@@ -187,10 +218,67 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith) =>  {
         ExpressionAttributeValues: {
             ':keyValue': {S: pkhash},
             ':sortValue' : {S: secondaryStartsWith}
-        },
-        ProjectionExpression: "PKhash, SKsort, asin, title, author"
+        }
+        
+    }
+    if (getTotal) {
+        params.Select = 'COUNT'
+    } else {
+        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
     }
     return issueQuery(params)
+      
+}
+
+/***************************************
+ *  Query By GSI1, Records by SK/partial PK
+ ****************************************/
+module.exports.getQueryByGSI1 = (sksort, secondaryStartsWith, getTotal = false) =>  {
+    console.log ("Get Query By PK: " + sksort)
+    const params = {
+        TableName : BOOK_TABLE,
+        IndexName : 'GSI1',
+        KeyConditionExpression: "#SKsort = :keyValue AND begins_with(#PKhash, :sortValue)",
+        ExpressionAttributeNames:{
+            '#PKhash': 'PKhash',
+            '#SKsort': 'SKsort'
+        },
+        ExpressionAttributeValues: {
+            ':keyValue': {S: sksort},
+            ':sortValue' : {S: secondaryStartsWith}
+        }
+        
+    }
+    if (getTotal) {
+        params.Select = 'COUNT'
+    } else {
+        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
+    }
+    return issueQuery(params)
+      
+}
+
+
+module.exports.getScanBySortKeyGSI1 = (sksort,  getTotal = false) =>  {
+    console.log ("Get Query By PK: " + sksort)
+    const params = {
+        TableName : BOOK_TABLE,
+        IndexName : 'GSI1',
+        FilterExpression: "begins_with(#SKsort, :keyValue)",
+        ExpressionAttributeNames:{
+            '#SKsort': 'SKsort'
+        },
+        ExpressionAttributeValues: {
+            ':keyValue': {S: sksort},
+        }
+        
+    }
+    if (getTotal) {
+        params.Select = 'COUNT'
+    } else {
+        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
+    }
+    return issueScan(params)
       
 }
 

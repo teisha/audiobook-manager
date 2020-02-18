@@ -1,10 +1,9 @@
 'use strict'
-const dynamodbUtils = require('../utils/dynamodbUtils')
 const Transaction = require('../models/transaction')
 
 
-module.exports.convertToTransaction = async ( data ) => {
-    let testTransaction
+module.exports.convertToTransaction = async ( data, dynamodbUtils ) => {
+    let transaction
     const dateParts = data.date.split('-')
     const dateString = new Date("20" + dateParts[2] + "-" + dateParts[0] + "-" + dateParts[1]).toISOString()
 
@@ -20,7 +19,7 @@ module.exports.convertToTransaction = async ( data ) => {
             console.error(error)
         }
 
-        testTransaction = new Transaction(data.asin, null, data.username, data.status, dateString, bookInfo.title, bookInfo.author )
+        transaction = new Transaction(data.asin, null, data.username, data.status, dateString, bookInfo.title, bookInfo.author )
     }
-    return testTransaction
+    return transaction
 }
