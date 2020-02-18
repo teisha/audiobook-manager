@@ -1,6 +1,13 @@
 'use-strict'
+const AWSXRay = require('aws-xray-sdk');
+let AWS
+if (require('os').platform() === 'win32') {
+    //for testing locally
+    AWS = require('aws-sdk')
+} else {
+    AWS = AWSXRay.captureAWS(require('aws-sdk'))
+}
 
-const AWS = require('aws-sdk')
 
 AWS.config.update({region: 'us-east-1'})
 const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'})
@@ -213,7 +220,8 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith, getTotal = false) =>
         KeyConditionExpression: "#PKhash = :keyValue AND begins_with(#SKsort, :sortValue)",
         ExpressionAttributeNames:{
             '#PKhash': 'PKhash',
-            '#SKsort': 'SKsort'
+            '#SKsort': 'SKsort',
+            '#status': 'Status'
         },
         ExpressionAttributeValues: {
             ':keyValue': {S: pkhash},
@@ -224,7 +232,7 @@ module.exports.getQueryByPK = (pkhash, secondaryStartsWith, getTotal = false) =>
     if (getTotal) {
         params.Select = 'COUNT'
     } else {
-        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
+        params.ProjectionExpression = "PKhash, SKsort, #status, asin, title, author"
     }
     return issueQuery(params)
       
@@ -237,15 +245,65 @@ module.exports.getQueryByGSI1 = (sksort, secondaryStartsWith, getTotal = false) 
     console.log ("Get Query By PK: " + sksort)
     const params = {
         TableName : BOOK_TABLE,
+         IndexName : 'GSI1'   //,
+        // KeyConditionExpression: "#SKsort = :keyValue AND begins_with(#PKhash, :sortValue)",
+        // ExpressionAttributeNames:{
+        //     '#PKhash': 'PKhash',
+        //     '#SKsort': 'SKsort'
+        // },
+        // ExpressionAttributeValues: {
+        //     ':keyValue': {S: sksort},
+        //     ':sortValue' : {S: secondaryStartsWith}
+        }
+
+
+    if (secondaryStartsWith) {
+        params.KeyConditionExpression = "#SKsort = :keyValue AND begins_with(#PKhash, :sortValue)"
+        params.ExpressionAttributeNames = {
+            '#PKhash': 'PKhash',
+            '#SKsort': 'SKsort',
+            '#status': 'Status'
+        }
+        params.ExpressionAttributeValues = {
+            ':keyValue': {S: sksort},
+            ':sortValue' : {S: secondaryStartsWith}
+        }
+    } else {
+        params.KeyConditionExpression = "#SKsort = :keyValue",
+        params.ExpressionAttributeNames = {
+            '#SKsort': 'SKsort',
+            '#status': 'Status'
+        },
+        params.ExpressionAttributeValues = {
+            ':keyValue': {S: sksort},
+        }
+    }        
+        
+    if (getTotal) {
+        params.Select = 'COUNT'
+    } else {
+        params.ProjectionExpression = "PKhash, SKsort, #status, asin, title, author"
+    }
+    return issueQuery(params)
+      
+}
+
+module.exports.getQueryByGSI1WithFilter = (sksort, secondaryStartsWith, filterField, filterValue, getTotal = false) =>  {
+    console.log ("Get Query By PK: " + sksort)
+    const params = {
+        TableName : BOOK_TABLE,
         IndexName : 'GSI1',
         KeyConditionExpression: "#SKsort = :keyValue AND begins_with(#PKhash, :sortValue)",
+        FilterExpression: "#filterField > :filterVal",
         ExpressionAttributeNames:{
             '#PKhash': 'PKhash',
-            '#SKsort': 'SKsort'
+            '#SKsort': 'SKsort',
+            '#filterField' : filterField
         },
         ExpressionAttributeValues: {
             ':keyValue': {S: sksort},
-            ':sortValue' : {S: secondaryStartsWith}
+            ':sortValue' : {S: secondaryStartsWith},
+            ':filterVal': {N: filterValue}
         }
         
     }
@@ -285,30 +343,44 @@ module.exports.getScanBySortKeyGSI1 = (sksort,  getTotal = false) =>  {
 /***************************************************
  * Query by GSI2 (Status)
  ******************************************************/
-module.exports.getQueryByStatus = (status, otherThing, getTotal = false) => {
+module.exports.getQueryByStatus = (status, pkbeginsWith , skBeginsWith, getTotal = false) => {
     console.log ("Get Query By Status: " + status)
     const params = {
         TableName: BOOK_TABLE,
         IndexName: 'GSI2'
     }
 
-    if (otherThing) {
-        params.KeyConditionExpression = "#statusField = :value AND begins_with(#PKhash, :secondParam)"
-        params.ExpressionAttributeNames = {
-            '#statusField': 'Status',
-            '#PKhash' : 'PKhash'
-        }
-        params.ExpressionAttributeValues = {
-            ':value' : {S: status},
-            ':secondParam' : {S: otherThing}
+    if (pkbeginsWith) {
+        params.KeyConditionExpression = "#statusField = :statusValue AND begins_with(#PKhash, :secondParam) "
+        if(skBeginsWith) {
+            params.FilterExpression = "begins_with(#SKsort, :thirdParam)"
+            params.ExpressionAttributeNames = {
+                '#statusField': 'Status',
+                '#PKhash' : 'PKhash',
+                '#SKsort' : 'SKsort'
+            }
+            params.ExpressionAttributeValues = {
+                ':statusValue' : {S: status},
+                ':secondParam' : {S: pkbeginsWith},
+                ':thirdParam' : {S: skBeginsWith}
+            }
+        } else {
+            params.ExpressionAttributeNames = {
+                '#statusField': 'Status',
+                '#PKhash' : 'PKhash'
+            }
+            params.ExpressionAttributeValues = {
+                ':statusValue' : {S: status},
+                ':secondParam' : {S: pkbeginsWith}
+            }
         }
     } else {
-        params.KeyConditionExpression = "#statusField = :value",
+        params.KeyConditionExpression = "#statusField = :statusValue",
         params.ExpressionAttributeNames = {
             '#statusField': 'Status'
         },
         params.ExpressionAttributeValues = {
-            ':value' : {S: status}
+            ':statusValue' : {S: status}
         }
     }
     if (getTotal) {

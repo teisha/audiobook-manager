@@ -37,50 +37,44 @@ const testBook = {
 
 describe.skip('Test Insert Book to dynamoDB',   () => {
     beforeEach(async (done) => {
-        try {
-            const deleted = await dynamodbUtils.removeRecord (insertBook.PKhash, insertBook.SKsort )
-            console.log(deleted)
-        } catch(error) {
-            console.error(error)
-        }
-        done()
+
+      const deleted = await dynamodbUtils.removeRecord (insertBook.PKhash, insertBook.SKsort )
+      console.log(deleted)
+      done()
     })
 
     it('validates book record is inserted',  async (done) => {
 
-        try {
-            const doesExist = await dynamodbUtils.getRecord (insertBook.PKhash, insertBook.SKsort )
-            console.log(doesExist)
-            expect(doesExist.PKhash).not.toBeDefined()
 
-            const newBook = await dynamodbUtils.saveRecord(insertBook.getInsertItem())
-            // const newTallies = await dynamodbUtils.saveRecord(insertBook.getTallyItem())
+      const doesExist = await dynamodbUtils.getRecord (insertBook.PKhash, insertBook.SKsort )
+      console.log(doesExist)
+      expect(doesExist.PKhash).not.toBeDefined()
 
-            const actualBook = await dynamodbUtils.getRecord (insertBook.PKhash, insertBook.SKsort )
+      const newBook = await dynamodbUtils.saveRecord(insertBook.getInsertItem())
+      // const newTallies = await dynamodbUtils.saveRecord(insertBook.getTallyItem())
+
+      const actualBook = await dynamodbUtils.getRecord (insertBook.PKhash, insertBook.SKsort )
 //            console.log( "GET ITEM: ", actualBook)
-            expect(actualBook).toBeDefined()
-            expect(actualBook.PKhash).toBe(insertBook.PKhash)
-            expect(actualBook.SKsort).toBe(insertBook.SKsort)
-            expect(actualBook.asin).toBe(testBook.asin)
-            expect(actualBook.title).toBe(testBook.title)
-            expect(actualBook.publisher).toBe(testBook.publisher)
-            expect(actualBook.author).toBe(testBook.author)
-            expect(actualBook.narrated_by).toBe(testBook.narrated_by)
-            expect(actualBook.copyright).toBe(testBook.copyright)
-            expect(actualBook.product_id).toBe(testBook.product_id)
-            expect(actualBook.release_date).toBe(testBook.release_date)
-            expect(actualBook.audible_url).toBe(testBook.info_link)
-            expect(actualBook.audible_series_link).toBe(testBook.series_link)
-            expect(actualBook.rating_average).not.toBeDefined()
-            expect(actualBook.rating_count).not.toBeDefined()
-            expect(actualBook.description).toBe(testBook.description)
-            expect(actualBook.summary).toBe(testBook.summary)
-        } catch(error) {
-            console.error(error)
-            expect(error).toBeNull()
-        }
+      expect(actualBook).toBeDefined()
+      expect(actualBook.PKhash).toBe(insertBook.PKhash)
+      expect(actualBook.SKsort).toBe(insertBook.SKsort)
+      expect(actualBook.asin).toBe(testBook.asin)
+      expect(actualBook.title).toBe(testBook.title)
+      expect(actualBook.publisher).toBe(testBook.publisher)
+      expect(actualBook.author).toBe(testBook.author)
+      expect(actualBook.narrated_by).toBe(testBook.narrated_by)
+      expect(actualBook.copyright).toBe(testBook.copyright)
+      expect(actualBook.product_id).toBe(testBook.product_id)
+      expect(actualBook.release_date).toBe(testBook.release_date)
+      expect(actualBook.audible_url).toBe(testBook.info_link)
+      expect(actualBook.audible_series_link).toBe(testBook.series_link)
+      expect(actualBook.rating_average).not.toBeDefined()
+      expect(actualBook.rating_count).not.toBeDefined()
+      expect(actualBook.description).toBe(testBook.description)
+      expect(actualBook.summary).toBe(testBook.summary)
 
-        done()
+
+      done()
     })
 })
 

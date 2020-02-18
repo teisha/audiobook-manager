@@ -23,41 +23,33 @@ const testData = {
 
 describe.skip("Test Transactions insert correctly",  () => {
     beforeEach(async (done) => {
-        try {
-            const deleted = await dynamodbUtils.removeRecord ("BOOK|" + testData.asin, "PERSON|" + testData.username )
-            console.log("deleted", deleted)
-        } catch(error) {
-            console.error(error)
-        }
+
+        const deleted = await dynamodbUtils.removeRecord ("BOOK|" + testData.asin, "PERSON|" + testData.username )
+        console.log("deleted", deleted)
+
         done()
     })
 
 
     it ("Insert a new purchase, tally purchases", async (done) => {
-        try {        
-            const doesExist = await dynamodbUtils.getRecord ("BOOK|" + testData.asin, "PERSON|" + testData.username ) 
-            expect(doesExist.PKhash).not.toBeDefined()
+     
+        const doesExist = await dynamodbUtils.getRecord ("BOOK|" + testData.asin, "PERSON|" + testData.username ) 
+        expect(doesExist.PKhash).not.toBeDefined()
 
-            const testTransaction = await importUtils.convertToTransaction(testData, dynamodbUtils)
-            expect(testTransaction.title).toBe('12 Strong: The Declassified True Story of the Horse Soldiers')
-            const tallyBeforeInsert = await dynamodbUtils.getRecord (testTransaction.PKhash, 'TALLIES')
+        const testTransaction = await importUtils.convertToTransaction(testData, dynamodbUtils)
+        expect(testTransaction.title).toBe('12 Strong: The Declassified True Story of the Horse Soldiers')
+        const tallyBeforeInsert = await dynamodbUtils.getRecord (testTransaction.PKhash, 'TALLIES')
 
-            const savedTransaction = await dynamodbUtils.insertTransaction(testTransaction.getInsertItem())
-            expect(savedTransaction[testTransaction.Status]).toBeGreaterThan(tallyBeforeInsert[testTransaction.Status])
+        const savedTransaction = await dynamodbUtils.insertTransaction(testTransaction.getInsertItem())
+        expect(savedTransaction[testTransaction.Status]).toBeGreaterThan(tallyBeforeInsert[testTransaction.Status])
 
-            const actualTransaction = await dynamodbUtils.getRecord (testTransaction.PKhash, testTransaction.SKsort )            
+        const actualTransaction = await dynamodbUtils.getRecord (testTransaction.PKhash, testTransaction.SKsort )            
 
-            expect(actualTransaction.PKhash).toBe(testTransaction.PKhash)
-            expect(actualTransaction.SKsort).toBe(testTransaction.SKsort)
-            expect(actualTransaction.Status).toBe(testTransaction.Status)
-            expect(actualTransaction.dateRecorded).toBe(testTransaction.dateRecorded)
-            expect(actualTransaction.username).toBe(testTransaction.username)
-
-        } catch(error) {
-            console.error(error)
-            expect(error).toBeNull()
-        }
-
+        expect(actualTransaction.PKhash).toBe(testTransaction.PKhash)
+        expect(actualTransaction.SKsort).toBe(testTransaction.SKsort)
+        expect(actualTransaction.Status).toBe(testTransaction.Status)
+        expect(actualTransaction.dateRecorded).toBe(testTransaction.dateRecorded)
+        expect(actualTransaction.username).toBe(testTransaction.username)
         done()
     })
 
@@ -65,36 +57,25 @@ describe.skip("Test Transactions insert correctly",  () => {
 
 describe.skip("Reporting Queries",  () => {
     it("returns transaction record by status", async  (done) => {
-        try {
-            const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED', 'BOOK|TESTBOOK_NOT_REAL_BOOK')
-//            console.log(purchasedTransaction)
-            expect(purchasedTransaction.ItemsJSON).toBeDefined()
-            expect(purchasedTransaction.Count).toBeGreaterThan(0)
-            const actual = purchasedTransaction.ItemsJSON[0]
-            expect(actual.SKsort).toBe('PERSON|rhunt')
-            expect(actual.PKhash).toBe('BOOK|TESTBOOK_NOT_REAL_BOOK')
-            expect(actual.Status).toBe('PURCHASED' )
 
-        } catch(error) {
-            console.error(error)
-            expect(error).toBeNull()
-        }
+        const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED', 'BOOK|TESTBOOK_NOT_REAL_BOOK')
+//            console.log(purchasedTransaction)
+        expect(purchasedTransaction.ItemsJSON).toBeDefined()
+        expect(purchasedTransaction.Count).toBeGreaterThan(0)
+        const actual = purchasedTransaction.ItemsJSON[0]
+        expect(actual.SKsort).toBe('PERSON|rhunt')
+        expect(actual.PKhash).toBe('BOOK|TESTBOOK_NOT_REAL_BOOK')
+        expect(actual.Status).toBe('PURCHASED' )
 
         done()
     })
 
     it("returns transaction record count by status", async  (done) => {
-        try {
-            const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED', 'BOOK|TESTBOOK_NOT_REAL_BOOK', true)
-            console.log(purchasedTransaction)
-            expect(purchasedTransaction.ItemsJSON).not.toBeDefined()
-            expect(purchasedTransaction.Count).toBe(1)
 
-        } catch(error) {
-            console.error(error)
-            expect(error).toBeNull()
-        }
-
+        const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED', 'BOOK|TESTBOOK_NOT_REAL_BOOK',null, true)
+        console.log(purchasedTransaction)
+        expect(purchasedTransaction.ItemsJSON).not.toBeDefined()
+        expect(purchasedTransaction.Count).toBe(1)
         done()
     })
 })

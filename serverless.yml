@@ -13,6 +13,8 @@ custom:
     start:
       migrate: true
 
+plugins:
+  - ./plugins/upload-test-file-plugin
 
 provider:
   name: aws
@@ -47,20 +49,32 @@ provider:
 
 
 functions:
-  backend:
-    handler: api/index.handler
+  books:
+    handler: api/books.handler
+    events:
+      - http: GET books
+  persons:
+    handler: api/persons.handler
+    events:
+      - http: GET person
+  credits:
+    handler: api/credits.handler
+    events:
+      - http: GET credits      
+  notfound:
+    handler: api/404.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
-  uploads:
+  uploader:
     handler: uploads/process.insert
     events:
       - s3:
           bucket: ${self:custom.bucket}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: uploads/
-            - suffix: .xls
+            - prefix: uploader/
+            - suffix: .xlsx
           existing: true
     environment: 
       KEY_PREFIX: 'uploads'
@@ -113,9 +127,15 @@ resources:
             KeyType: RANGE
           Projection:
             NonKeyAttributes:
-              - Name 
+              - asin
+              - title 
+              - author
+              - username
               - Status
-              - DateRecorded
+              - dateRecorded
+              - PURCHASED
+              - WISHLIST
+              - LISTENED
             ProjectionType: INCLUDE
           ProvisionedThroughput:
             ReadCapacityUnits: 1

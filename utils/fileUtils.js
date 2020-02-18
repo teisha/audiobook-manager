@@ -2,7 +2,15 @@
 const fs = require('fs')
 const path = require('path')
 const XLSX = require('xlsx');
-const AWS = require('aws-sdk')
+const AWSXRay = require('aws-xray-sdk');
+let AWS
+if (require('os').platform() === 'win32') {
+    //for testing locally
+    AWS = require('aws-sdk')
+} else {
+    AWS = AWSXRay.captureAWS(require('aws-sdk'))
+}
+
 
 AWS.config.update({region: 'us-east-1'})
 const s3 = new AWS.S3({apiVersion: '2006-03-01'})

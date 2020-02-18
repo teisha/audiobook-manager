@@ -8,7 +8,7 @@ module.exports = class Credit {
         this.SKsort = 'PERSON|' + username
         this.username = username
         this.Status = status
-        this.dateRecorded = new Date(dateIssued).toISOString
+        this.dateRecorded = new Date(dateIssued).toISOString()
     }
 
     getInsertItem () {

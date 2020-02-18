@@ -39,6 +39,7 @@ module.exports.insert = (event) => {
         console.error(error)
     })
     /*
+    Event JSON
     {  
    "Records":[  
       {  
@@ -90,31 +91,31 @@ const readFileAndSaveToDynamodb = (filename) => {
     .then( (workbook) => {
         const insertPromises = []
         // Books =>  array of JSON to convert to Book
-console.log(workbook.SheetNames)     
-        // if (workbook.Sheets['Books']) {
-        //     const bookJSON = XLSX.utils.sheet_to_json(workbook.Sheets['Books'])
-        //     bookJSON.map(book => {
-        //         return new Book (book.asin, book.title, book.title_short, book.publisher, book.author, book.narrated_by, book.copyright, book.product_id, book.release_date, book.audible_url, book.audible_series_link, book.rating_average, book.rating_count, book.description, book.summary)
-        //     })
-        //     .forEach(bookObj => {
-        //         insertPromises.push( 
-        //             dynamodbUtils.saveRecord(bookObj.getInsertItem() )
-        //             .then((recordSaved) => {
-        //                 console.log("book saved", bookObj.PKhash, recordSaved)
-        //                 return dynamodbUtils.saveRecord(bookObj.getTallyItem())
-        //             })
-        //             .then((tallySaved) => {
-        //                 console.log ("Tally saved", bookObj.PKhash, tallySaved)
-        //                 return Promise.resolve(bookObj.PKhash)
-        //             })
-        //             .catch((error) => {
-        //                 console.log("Error saving tally!", bookObj.PKhash, bookObj.SKsort)
-        //                 console.error(error)
-        //                 return Promise.resolve("ERROR|" + error.code + "(" + error.statusCode + "), Book: " + bookObj.PKhash + " " + bookObj.SKsort + " :" + error.message)
-        //             })
-        //         )
-        //     })            
-        // }
+        console.log(workbook.SheetNames)     
+        if (workbook.Sheets['Books']) {
+            const bookJSON = XLSX.utils.sheet_to_json(workbook.Sheets['Books'])
+            bookJSON.map(book => {
+                return new Book (book.asin, book.title, book.title_short, book.publisher, book.author, book.narrated_by, book.copyright, book.product_id, book.release_date, book.audible_url, book.audible_series_link, book.rating_average, book.rating_count, book.description, book.summary)
+            })
+            .forEach(bookObj => {
+                insertPromises.push( 
+                    dynamodbUtils.saveRecord(bookObj.getInsertItem() )
+                    .then((recordSaved) => {
+                        console.log("book saved", bookObj.PKhash, recordSaved)
+                        return dynamodbUtils.saveRecord(bookObj.getTallyItem())
+                    })
+                    .then((tallySaved) => {
+                        console.log ("Tally saved", bookObj.PKhash, tallySaved)
+                        return Promise.resolve(bookObj.PKhash)
+                    })
+                    .catch((error) => {
+                        console.log("Error saving tally!", bookObj.PKhash, bookObj.SKsort)
+                        console.error(error)
+                        return Promise.resolve("ERROR|" + error.code + "(" + error.statusCode + "), Book: " + bookObj.PKhash + " " + bookObj.SKsort + " :" + error.message)
+                    })
+                )
+            })            
+        }
         //People =>
         if (workbook.Sheets['People']) {
             const peopleJSON = XLSX.utils.sheet_to_json(workbook.Sheets['People'])           
@@ -186,7 +187,8 @@ console.log(workbook.SheetNames)
 
     })
     .then ((insertedStatuses) => {
-        console.log(insertedStatuses.filter(result => result.startsWith('ERROR')  ))
+//        console.log(insertedStatuses)
+        console.log(insertedStatuses.filter(inserted => typeof inserted === 'string' && inserted.startsWith("ERROR")))
         return Promise.resolve(insertedStatuses)
     })
     .catch((error) => {

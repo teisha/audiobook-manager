@@ -1,6 +1,6 @@
 'use strict'
 const path = require('path')
-const processor = require('../uploads/process')
+const processor = require('../uploader/process')
 const fileUtils = require('../utils/fileUtils')
 const dynamodbUtils = require ('../utils/dynamodbUtils')
 const AWS = require('aws-sdk')
@@ -17,11 +17,25 @@ dynamodbUtils.ddb = ddb
 
 
 jest.setTimeout(60000);
-describe ("Uploaded files go to database", () => {
+describe.skip ("Uploaded files go to database", () => {
     it ("takes file on s3 and loads to table", async () => {
         const testFile = 'test/books.xlsx'
+        const mockEvent = {"Records": [
+                                {
+                                    "eventTime": new Date().toISOString(),
+                                    "eventName":"Testing",
+                                    "s3": {
+                                        "bucket" : {
+                                            "name" : BUCKET
+                                        },
+                                        "object": {
+                                            "key": testFile
+                                        }
+                                    }
+                                }
+                            ]}
         try {
-            const outcome = await processor.uploadWithoutEvent (testFile)
+            const outcome = await processor.insert(mockEvent) 
             const bookTotals = await dynamodbUtils.getScanBySortKeyGSI1('TITLE|', true )
             const tallyTotals = await dynamodbUtils.getScanBySortKeyGSI1('TALLIES', true )
             const peopleTotals = await dynamodbUtils.getScanBySortKeyGSI1('NAME|', true)

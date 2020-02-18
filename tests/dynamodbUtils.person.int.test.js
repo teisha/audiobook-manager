@@ -2,6 +2,7 @@
 const path = require('path')
 const dynamodbUtils = require('../utils/dynamodbUtils')
 const Person = require('../models/person')
+const Credit = require('../models/credit')
 const AWS = require('aws-sdk')
 
 const secretsPath = path.join(__dirname, 'secrets.json')
@@ -20,37 +21,54 @@ const testPerson = new Person (testHuman.username, testHuman.name, testHuman.ema
 
 describe.skip ("Inserting People", () => {
     beforeEach(async (done) => {
-        try {
-            const deleted = await dynamodbUtils.removeRecord (testPerson.PKhash, testPerson.SKsort )
-            console.log(deleted)
-        } catch(error) {
-            console.error(error)
-        }
+        const deleted = await dynamodbUtils.removeRecord (testPerson.PKhash, testPerson.SKsort )
+        console.log(deleted)
         done()
     })
 
     it('validates person record is inserted',  async (done) => {
-        try {
-            const doesExist = await dynamodbUtils.getRecord (testPerson.PKhash, testPerson.SKsort ) 
-                expect(doesExist.PKhash).not.toBeDefined()
-            const newPerson = await dynamodbUtils.saveRecord(testPerson.getInsertItem())
-            const actualPerson = await dynamodbUtils.getRecord (testPerson.PKhash, testPerson.SKsort )            
+        const doesExist = await dynamodbUtils.getRecord (testPerson.PKhash, testPerson.SKsort ) 
+            expect(doesExist.PKhash).not.toBeDefined()
+        const newPerson = await dynamodbUtils.saveRecord(testPerson.getInsertItem())
+        const actualPerson = await dynamodbUtils.getRecord (testPerson.PKhash, testPerson.SKsort )            
 
-            expect(actualPerson.PKhash).toBe(testPerson.PKhash)
-            expect(actualPerson.SKsort).toBe(testPerson.SKsort)   
-            expect(actualPerson.username).toBe(testPerson.username)  
-            expect(actualPerson.name).toBe(testPerson.name)
-            expect(actualPerson.email).toBe(testPerson.email)
-            expect(actualPerson.phone).toBe(testPerson.phone)
+        expect(actualPerson.PKhash).toBe(testPerson.PKhash)
+        expect(actualPerson.SKsort).toBe(testPerson.SKsort)   
+        expect(actualPerson.username).toBe(testPerson.username)  
+        expect(actualPerson.name).toBe(testPerson.name)
+        expect(actualPerson.email).toBe(testPerson.email)
+        expect(actualPerson.phone).toBe(testPerson.phone)
+        done()
+    })
+})
 
+const testCredit = {
+    person: 'rhunt',
+    status: 'ISSUED',
+    dateIssued: '08-MAY-2012'
+} 
+const testCreditObj = new Credit (testCredit.person, testCredit.status, testCredit.dateIssued)
+testCreditObj.PKhash = 'CREDIT|TEST696490684506845790'
 
-        } catch (error) {
-            console.error(error)
-            expect(error).toBeNull()
-        }
-
+describe.skip("Inserting Credits", () => {
+    beforeEach(async (done) => {
+        const deleted = await dynamodbUtils.removeRecord (testCreditObj.PKhash, testCreditObj.SKsort )
+        console.log(deleted)
         done()
     })
 
+    it('validates credit record is inserted',  async (done) => {
+        expect(testCreditObj.dateRecorded).toMatch(/^2012-05-08T/)
+        const doesExist = await dynamodbUtils.getRecord (testCreditObj.PKhash, testCreditObj.SKsort ) 
+        expect(doesExist.PKhash).not.toBeDefined()
+        const newCredit = await dynamodbUtils.saveRecord(testCreditObj.getInsertItem())
+        const actualCredit = await dynamodbUtils.getRecord (testCreditObj.PKhash, testCreditObj.SKsort )            
 
+        expect(actualCredit.PKhash).toBe(testCreditObj.PKhash)
+        expect(actualCredit.SKsort).toBe(testCreditObj.SKsort)   
+        expect(actualCredit.username).toBe(testCreditObj.username)  
+        expect(actualCredit.Status).toBe(testCreditObj.Status)
+        expect(actualCredit.dateRecorded).toBe(testCreditObj.dateRecorded)
+        done()
+    })
 })
