@@ -12,7 +12,7 @@ if (require('os').platform() === 'win32') {
 AWS.config.update({region: 'us-east-1'})
 const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'})
 
-const BOOK_TABLE = process.env.BOOK_TABLE ||  'audiobooks-dev'
+const BOOK_TABLE = process.env.BOOK_TABLE ||  'audiobooks-qa'
 
 
 
@@ -167,7 +167,7 @@ const issueScan =  (params) => {
             })
             console.log(data.ItemsJSON)
         }
-
+console.log(params, data)
 // If there are more items than the query returned, 
 // this would set "ExclusiveStartKey" on params
 // with the value of data.LastEvaluatedKey

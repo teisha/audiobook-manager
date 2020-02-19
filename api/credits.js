@@ -1,9 +1,10 @@
+const dynamodbUtils = require('../utils/dynamodbUtils')
 /*******************************************************************
  *  Credit-focused queries
  *******************************************************************/
 // When is ?person? next credit coming? GS2- PERSON_NEXT
 // /next/:username', 
-exports.getNextCreditByUser = (req, res) => {
+exports.getNextCreditByUser = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -23,7 +24,7 @@ exports.getNextCreditByUser = (req, res) => {
 
 // How many unused credits for person?
 // '/issued/total/:username', 
-exports.getTotalIssuedCreditsByUser = (req, res) => {
+exports.getTotalIssuedCreditsByUser = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {

@@ -24,7 +24,7 @@ The plugin for this project is called "uploadExcelFile".
 The plugin will take an Excel filename and upload that into the bucket and directory specified as custom variables in the serverless.yml file.
 Usage is: 
 
-    serverless uploadExcelFile -xlFile "./assets/data/books.xlsx"
+    serverless uploadExcelFile --filePath ./assets/data/books.xlsx
 
 
 # Project Structure

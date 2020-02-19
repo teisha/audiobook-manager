@@ -35,7 +35,7 @@ const testBook = {
 
 
 
-describe.skip('Test Insert Book to dynamoDB',   () => {
+describe('Test Insert Book to dynamoDB',   () => {
     beforeEach(async (done) => {
 
       const deleted = await dynamodbUtils.removeRecord (insertBook.PKhash, insertBook.SKsort )

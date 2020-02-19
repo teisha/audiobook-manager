@@ -5,7 +5,7 @@ const fileUtils = require('../utils/fileUtils')
 const dynamodbUtils = require ('../utils/dynamodbUtils')
 const AWS = require('aws-sdk')
 
-const BUCKET = 'lsft-audiobook-manager-dev'
+const BUCKET = 'lsft-audiobook-manager-qa'
 
 const secretsPath = path.join(__dirname, 'secrets.json')
 AWS.config.loadFromPath(secretsPath);
@@ -17,7 +17,7 @@ dynamodbUtils.ddb = ddb
 
 
 jest.setTimeout(60000);
-describe.skip ("Uploaded files go to database", () => {
+describe("Uploaded files go to database", () => {
     it ("takes file on s3 and loads to table", async () => {
         const testFile = 'test/books.xlsx'
         const mockEvent = {"Records": [

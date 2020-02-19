@@ -16,6 +16,8 @@ custom:
 
 plugins:
   - upload-test-file-plugin
+  - serverless-dynamodb-local
+  - serverless-offline
 
 provider:
   name: aws
@@ -37,6 +39,7 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - {"Fn::GetAtt": ["UsersDynamoDBTable", "Arn"]}
+        - "arn:aws:dynamodb:::${self:custom.tableName}/index/*"
     - Effect: Allow
       Action:
         - s3:PutObject
@@ -72,22 +75,22 @@ functions:
 
 resources:
   Resources:
-    # UploadBucket:
-    #   Type: AWS::S3::Bucket
-    #   Properties:
-    #     BucketName: ${self:custom.bucket}
-    #     AccessControl: Private
-    #     CorsConfiguration:
-    #       CorsRules:
-    #       - AllowedMethods:
-    #         - GET
-    #         - PUT
-    #         - POST
-    #         - HEAD
-    #         AllowedOrigins:
-    #         - "*"
-    #         AllowedHeaders:
-    #         - "*"    
+    UploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+          - AllowedMethods:
+            - GET
+            - PUT
+            - POST
+            - HEAD
+            AllowedOrigins:
+            - "*"
+            AllowedHeaders:
+            - "*"    
     UsersDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
@@ -104,8 +107,8 @@ resources:
           - AttributeName: SKsort
             KeyType: RANGE  
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         TableName: ${self:custom.tableName} 
         GlobalSecondaryIndexes:
         - IndexName: GSI1
@@ -127,8 +130,8 @@ resources:
               - LISTENED
             ProjectionType: INCLUDE
           ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1            
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5            
         - IndexName: GSI2
           KeySchema:
           - AttributeName: Status
@@ -138,7 +141,7 @@ resources:
           Projection: 
             ProjectionType: KEYS_ONLY
           ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
 
 

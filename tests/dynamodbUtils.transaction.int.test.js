@@ -21,7 +21,7 @@ const testData = {
 }
 
 
-describe.skip("Test Transactions insert correctly",  () => {
+describe("Test Transactions insert correctly",  () => {
     beforeEach(async (done) => {
 
         const deleted = await dynamodbUtils.removeRecord ("BOOK|" + testData.asin, "PERSON|" + testData.username )
@@ -55,7 +55,7 @@ describe.skip("Test Transactions insert correctly",  () => {
 
 })
 
-describe.skip("Reporting Queries",  () => {
+describe("Reporting Queries",  () => {
     it("returns transaction record by status", async  (done) => {
 
         const purchasedTransaction = await dynamodbUtils.getQueryByStatus('PURCHASED', 'BOOK|TESTBOOK_NOT_REAL_BOOK')

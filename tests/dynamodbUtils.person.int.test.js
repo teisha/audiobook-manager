@@ -19,7 +19,7 @@ const testHuman = {
 
 const testPerson = new Person (testHuman.username, testHuman.name, testHuman.email, testHuman.phone)
 
-describe.skip ("Inserting People", () => {
+describe ("Inserting People", () => {
     beforeEach(async (done) => {
         const deleted = await dynamodbUtils.removeRecord (testPerson.PKhash, testPerson.SKsort )
         console.log(deleted)
@@ -50,7 +50,7 @@ const testCredit = {
 const testCreditObj = new Credit (testCredit.person, testCredit.status, testCredit.dateIssued)
 testCreditObj.PKhash = 'CREDIT|TEST696490684506845790'
 
-describe.skip("Inserting Credits", () => {
+describe("Inserting Credits", () => {
     beforeEach(async (done) => {
         const deleted = await dynamodbUtils.removeRecord (testCreditObj.PKhash, testCreditObj.SKsort )
         console.log(deleted)

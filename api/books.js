@@ -1,10 +1,11 @@
+const dynamodbUtils = require('../utils/dynamodbUtils')
 /*******************************************************************
  *  Book-focused queries
  *******************************************************************/
 
 // How many books are available
 //  /total'
-exports.getTotal = (req, res) => {
+exports.getTotal = async (req, res) => {
     try {
         const results = await dynamodbUtils.getScanBySortKeyGSI1('TITLE|', true )
         if (results.Count) {
@@ -21,7 +22,7 @@ exports.getTotal = (req, res) => {
 
 // How many books are currently on wishlists to?  GSI1 -  TALLIES, filter 
 // /wishlist/total',
-exports.getWishlistTotal = (req, res) => {
+exports.getWishlistTotal = async (req, res) => {
     try {
         const results = await dynamodbUtils.getQueryByGSI1WithFilter('TALLIES', 'BOOK|', 'WISHLIST', "0", true)
         if (results.Count) {
@@ -39,7 +40,7 @@ exports.getWishlistTotal = (req, res) => {
 
 // Get me information for a title
 // /title/:title', 
-exports.getBookByTitle = (req, res) => {
+exports.getBookByTitle = async (req, res) => {
     const title = req.params.title
     const sksort =  'TITLE|' + title
     try {
@@ -58,7 +59,7 @@ exports.getBookByTitle = (req, res) => {
 
 // How many times has Book been purchased
 // /purchased/:asin', 
-exports.getPurchasedByAsin = (req, res) => {
+exports.getPurchasedByAsin = async (req, res) => {
     const asin = req.params.asin
     const pkhash =  'BOOK|' + asin
     try {
