@@ -28,7 +28,7 @@ exports.getTotalPurchasedByUser =  async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
-        const results = await dynamodbUtils.getQueryByStatus('PURCHASED','BOOK|', username , true)
+        const results = await dynamodbUtils.getQueryByStatus('PURCHASED','BOOK|', pkuser , true)
         if (results.Count) {
             return res.status(200).json({message: `User ${username} has purchased ${results.Count} audiobooks.`})
         } else {
@@ -47,7 +47,7 @@ exports.getUserWishlist =  async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
-        const results = await dynamodbUtils.getQueryByStatus('WISHLIST','BOOK|', username , false)
+        const results = await dynamodbUtils.getQueryByStatus('WISHLIST','BOOK|', pkuser , false)
         if (results.ItemsJSON) {
             return res.status(200).json(results.ItemsJSON)
         } else {
@@ -67,7 +67,7 @@ exports.getUserListened = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
-        const results = await dynamodbUtils.getQueryByStatus('LISTENED','BOOK|', username , false)
+        const results = await dynamodbUtils.getQueryByStatus('LISTENED','BOOK|', pkuser , false)
         if (results.ItemsJSON) {
             return res.status(200).json(results.ItemsJSON)
         } else {

@@ -195,7 +195,7 @@ const issueQuery =  (params) => {
             })
             console.log(data.ItemsJSON.PKHash)
         }
-
+console.log(params, data)
 // If there are more items than the query returned, 
 // this would set "ExclusiveStartKey" on params
 // with the value of data.LastEvaluatedKey
@@ -282,7 +282,7 @@ module.exports.getQueryByGSI1 = (sksort, secondaryStartsWith, getTotal = false) 
     if (getTotal) {
         params.Select = 'COUNT'
     } else {
-        params.ProjectionExpression = "PKhash, SKsort, #status, asin, title, author"
+        params.ProjectionExpression = "PKhash, SKsort, #status, asin, title, author, PURCHASED, WISHLIST, LISTENED"
     }
     return issueQuery(params)
       
@@ -310,7 +310,7 @@ module.exports.getQueryByGSI1WithFilter = (sksort, secondaryStartsWith, filterFi
     if (getTotal) {
         params.Select = 'COUNT'
     } else {
-        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
+        params.ProjectionExpression = "PKhash, SKsort, asin, title, author, PURCHASED, WISHLIST, LISTENED"
     }
     return issueQuery(params)
       
@@ -334,7 +334,7 @@ module.exports.getScanBySortKeyGSI1 = (sksort,  getTotal = false) =>  {
     if (getTotal) {
         params.Select = 'COUNT'
     } else {
-        params.ProjectionExpression = "PKhash, SKsort, asin, title, author"
+        params.ProjectionExpression = "PKhash, SKsort, asin, title, author, PURCHASED, WISHLIST, LISTENED"
     }
     return issueScan(params)
       

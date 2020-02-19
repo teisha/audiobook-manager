@@ -66,12 +66,13 @@ exports.getPurchasedByAsin = async (req, res) => {
         const results = await dynamodbUtils.getQueryByGSI1('TALLIES', pkhash)
         if (results.ItemsJSON && results.ItemsJSON.length > 0) {
             const purchased = results.ItemsJSON[0].PURCHASED
-            return res.status(200).json({message: `${asin} has been purchased ${purchased} times`})
-        } else {
-            return res.status(400).json({error: 'Cannot get information for ' + pkhash})
-        } 
+            if (typeof purchased !== "undefined") {
+                return res.status(200).json({message: `${asin} has been purchased ${purchased} times`})
+            }
+        }
+        return res.status(400).json({error: 'Cannot get information for ' + asin})
     } catch (error) {
-        console.log('Error getting book details for ' + pkhash )
+        console.log('Error getting book details for ' + asin )
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }

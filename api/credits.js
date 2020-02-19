@@ -8,7 +8,7 @@ exports.getNextCreditByUser = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
-        const results = await dynamodbUtils.getQueryByStatus('NEXT', 'CREDIT|', username , false)
+        const results = await dynamodbUtils.getQueryByStatus('NEXT', 'CREDIT|', pkuser , false)
         if (results.ItemsJSON) {
             return res.status(200).json(results.ItemsJSON)
         } else {
@@ -28,7 +28,7 @@ exports.getTotalIssuedCreditsByUser = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
-        const results = await dynamodbUtils.getQueryByStatus('ISSUED', 'CREDIT|', username , true)
+        const results = await dynamodbUtils.getQueryByStatus('ISSUED', 'CREDIT|', pkuser , true)
         if (results.Count) {
             return res.status(200).json({message: `${username} has ${results.Count} credits available`})
         } else {
