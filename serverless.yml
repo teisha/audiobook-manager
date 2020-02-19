@@ -6,10 +6,10 @@ service: audiobook-backend
 
 
 custom:
-  bucket: 'lsft-audiobook-manager-${self:provider.stage}'
+  bucket: 'lsft-audiobook-manager-${opt:stage}'
   uploadDirectory: 'uploads'
   deployBucket: 'serverless-deploy-all-lsft-projects'
-  tableName: 'audiobooks-${self:provider.stage}'
+  tableName: 'audiobooks-${opt:stage}'
   dynamodb:
     start:
       migrate: true
@@ -39,7 +39,8 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - {"Fn::GetAtt": ["UsersDynamoDBTable", "Arn"]}
-        - "arn:aws:dynamodb:::${self:custom.tableName}/index/*"
+        - {"Fn::Join" : [ "/", ["Fn::GetAtt": ["UsersDynamoDBTable", "Arn"], "index/GSI1"] ]}
+        - {"Fn::Join" : [ "/", ["Fn::GetAtt": ["UsersDynamoDBTable", "Arn"], "index/GSI2"] ]}
     - Effect: Allow
       Action:
         - s3:PutObject

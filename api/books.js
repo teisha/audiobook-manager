@@ -68,10 +68,10 @@ exports.getPurchasedByAsin = async (req, res) => {
             const purchased = results.ItemsJSON[0].PURCHASED
             return res.status(200).json({message: `${asin} has been purchased ${purchased} times`})
         } else {
-            return res.status(400).json({error: 'Cannot get information for ' + title})
+            return res.status(400).json({error: 'Cannot get information for ' + pkhash})
         } 
     } catch (error) {
-        console.log('Error getting book details for ' + title )
+        console.log('Error getting book details for ' + pkhash )
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
