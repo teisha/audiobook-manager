@@ -1,17 +1,9 @@
-const serverless = require('serverless-http');
-const bodyParser = require('body-parser')
-const express = require('express')
-const dynamodbUtils = require('../utils/dynamodbUtils')
-
-const app = express()
-app.use(bodyParser.json({strict: false}))
-
-
 /*******************************************************************
  *  Credit-focused queries
  *******************************************************************/
 // When is ?person? next credit coming? GS2- PERSON_NEXT
-app.get('/next/:username', (req, res) => {
+// /next/:username', 
+exports.getNextCreditByUser = (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -26,11 +18,12 @@ app.get('/next/:username', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 
 // How many unused credits for person?
-app.get('/issued/total/:username', (req, res) => {
+// '/issued/total/:username', 
+exports.getTotalIssuedCreditsByUser = (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -45,18 +38,6 @@ app.get('/issued/total/:username', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-module.exports.handler = serverless(app);

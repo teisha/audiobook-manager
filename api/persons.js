@@ -1,18 +1,10 @@
-const serverless = require('serverless-http');
-const bodyParser = require('body-parser')
-const express = require('express')
-const dynamodbUtils = require('../utils/dynamodbUtils')
-
-const app = express()
-app.use(bodyParser.json({strict: false}))
-
-
 /*******************************************************************
  *  Person-focused queries
  *******************************************************************/
 
 // Activity on User Account    - GSI1
-app.get('/activity/:username', (req, res) => {
+// '/activity/:username', 
+exports.getAllActivityByUser = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -27,10 +19,11 @@ app.get('/activity/:username', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 //What books do we own?:   GSI2 - purchased
-app.get('/purchased/total/:username', async(req, res) => {
+// '/purchased/total/:username',
+exports.getTotalPurchasedByUser =  async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -45,10 +38,11 @@ app.get('/purchased/total/:username', async(req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 // What book does ?person? want to buy?  GSI2 - PERSON_WISHLIST
-app.get('/wishlist/:username', (req, res) => {
+// '/wishlist/:username',
+exports.getUserWishlist =  async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -63,11 +57,12 @@ app.get('/wishlist/:username', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 
 //What books are ?person? reading? - GSI2 - PERSON_READING
-app.get('/listening/:username', (req, res) => {
+// '/listening/:username', 
+exports.getUserListened = async (req, res) => {
     const username = req.params.username
     const pkuser =  'PERSON|' + username
     try {
@@ -82,10 +77,6 @@ app.get('/listening/:username', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 
-
-
-
-module.exports.handler = serverless(app);

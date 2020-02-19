@@ -22,9 +22,9 @@ The objects this file creates are:
 The files for custom plugins are found in .serverless_plugins directory.
 The plugin for this project is called "uploadExcelFile".
 The plugin will take an Excel filename and upload that into the bucket and directory specified as custom variables in the serverless.yml file.
-Usage is: \
+Usage is: 
 
-    `serverless uploadExcelFile -xlFile "./assets/data/books.xlsx"`
+    serverless uploadExcelFile -xlFile "./assets/data/books.xlsx"
 
 
 # Project Structure
@@ -32,25 +32,25 @@ Usage is: \
 The following directories contain project code and supporting object:
 
 ### api directory
-    These are the apis made available by the HTTP functions defined in serverless.yml
+These are the apis made available by the HTTP functions defined in serverless.yml
 
 ### utils directory
-    These are modules that contain the worker functions to access S3 and dynamoDB.
-    ImportUtils contains a method to convert data read from Excel into a Transaction object.
+These are modules that contain the worker functions to access S3 and dynamoDB.
+ImportUtils contains a method to convert data read from Excel into a Transaction object.
 
 ### models directory
-    This directory contains a javascript file for each class defining the entities that drive the application.
-    Each class knows it's data structure and how to format the data to be inserted into DynamoDB.
+This directory contains a javascript file for each class defining the entities that drive the application.
+Each class knows it's data structure and how to format the data to be inserted into DynamoDB.
 
 ### uploader directory
-    This directory contains the code for processing the event called when an Excel file is put into the S3 bucket, which will save that data into the DynamoDB table
+This directory contains the code for processing the event called when an Excel file is put into the S3 bucket, which will save that data into the DynamoDB table
 
 ### assets directory
-    This contains non-code objects needed by the application.
-    The data directory contains the file that will be uploaded to S3 upon deploy
+This contains non-code objects needed by the application.
+The data directory contains the file that will be uploaded to S3 upon deploy
 
 ### tests directory
-    These are integration tests that drove the development of the application.  They are mostly functional and do not cover all test cases.
+These are integration tests that drove the development of the application.  They are mostly functional and do not cover all test cases.
 
 # Data Uploads 
 

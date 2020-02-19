@@ -7,7 +7,7 @@ service: audiobook-backend
 
 custom:
   bucket: 'lsft-audiobook-manager-${self:provider.stage}'
-  uploadDirectory: 'uploader'
+  uploadDirectory: 'uploads'
   deployBucket: 'serverless-deploy-all-lsft-projects'
   tableName: 'audiobooks-${self:provider.stage}'
   dynamodb:
@@ -20,7 +20,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: dev
+  stage: qa
   region: us-east-1
   deploymentBucket: ${self:custom.deployBucket}
   s3:
@@ -51,19 +51,7 @@ provider:
 
 functions:
   books:
-    handler: api/books.handler
-    events:
-      - http: GET books
-  persons:
-    handler: api/persons.handler
-    events:
-      - http: GET person
-  credits:
-    handler: api/credits.handler
-    events:
-      - http: GET credits      
-  notfound:
-    handler: api/404.handler
+    handler: api/index.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'

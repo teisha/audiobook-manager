@@ -1,19 +1,10 @@
-const serverless = require('serverless-http');
-const bodyParser = require('body-parser')
-const express = require('express')
-const dynamodbUtils = require('../utils/dynamodbUtils')
-
-const app = express()
-app.use(bodyParser.json({strict: false}))
-
-
-
 /*******************************************************************
  *  Book-focused queries
  *******************************************************************/
 
 // How many books are available
-app.get('/total', (req, res) => {
+//  /total'
+exports.getTotal = (req, res) => {
     try {
         const results = await dynamodbUtils.getScanBySortKeyGSI1('TITLE|', true )
         if (results.Count) {
@@ -26,10 +17,11 @@ app.get('/total', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 // How many books are currently on wishlists to?  GSI1 -  TALLIES, filter 
-app.get('/wishlist/total', (req, res) => {
+// /wishlist/total',
+exports.getWishlistTotal = (req, res) => {
     try {
         const results = await dynamodbUtils.getQueryByGSI1WithFilter('TALLIES', 'BOOK|', 'WISHLIST', "0", true)
         if (results.Count) {
@@ -42,11 +34,12 @@ app.get('/wishlist/total', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 
 // Get me information for a title
-app.get('/title/:title', (req, res) => {
+// /title/:title', 
+exports.getBookByTitle = (req, res) => {
     const title = req.params.title
     const sksort =  'TITLE|' + title
     try {
@@ -61,10 +54,11 @@ app.get('/title/:title', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
+}
 
 // How many times has Book been purchased
-app.get('/purchased/:asin', (req, res) => {
+// /purchased/:asin', 
+exports.getPurchasedByAsin = (req, res) => {
     const asin = req.params.asin
     const pkhash =  'BOOK|' + asin
     try {
@@ -80,8 +74,4 @@ app.get('/purchased/:asin', (req, res) => {
         console.error(error)
         return res.status(400).json({error: 'An error occurred.  Please try again.'})
     }
-})
-
-
-
-module.exports.handler = serverless(app);
+}

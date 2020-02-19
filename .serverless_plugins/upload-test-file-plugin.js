@@ -35,7 +35,7 @@ const getS3 = (serverless) => {
         s3 : '2006-03-01'
       }
     });
-    return AWS.S3()
+    return new AWS.S3()
 } 
  
 const uploadData = (serverless, options)  =>  {
@@ -43,7 +43,12 @@ const uploadData = (serverless, options)  =>  {
     const keyPrefix = serverless.service.custom.uploadDirectory
     const sourcePath = options.filePath 
     const filename  = sourcePath.substring(sourcePath.lastIndexOf('/')+1)
-    const extension = fileName.split('.').pop()
+    if (!filename) {
+        serverless.cli.log("ERROR UPLOADING FILE: Incorrect filename.")
+        serverless.cli.log("Could not determine file name from " + sourcePath)
+        throw new Error ("NO_FILE_NAME") 
+    }
+    const extension = filename.split('.').pop()
 
     if (!extension.startsWith('xls')) {
         serverless.cli.log("ERROR UPLOADING FILE: Incorrect format.")
@@ -72,7 +77,7 @@ const uploadData = (serverless, options)  =>  {
         Body: readStream
     }
 
-    return getS3().upload(params).promise()        
+    return getS3(serverless).upload(params).promise()        
     .then((data) => {
         serverless.cli.log("File written (awsutils): " + bucketName + "/" + s3File)
         serverless.cli.log(data)  
