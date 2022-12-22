@@ -31,6 +31,6 @@
     "eslint": "^6.8.0",
     "jest": "^25.1.0",
     "serverless-dynamodb-local": "^0.2.39",
-    "serverless-offline": "^5.12.1"
+    "serverless-offline": "^12.0.3"
   }
 }
